@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Quiz App</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- Three.js for 3D effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Custom styles -->
+    <style>
+        /* Modern High-Tech Theme */
+        body {
+            background: linear-gradient(135deg, #0a192f, #112240);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Noto Sans', 'Noto Sans CJK SC', 'Noto Sans CJK TC', 'Noto Sans CJK JP', 'Noto Sans CJK KR', sans-serif;
+            color: #64ffda;
+        }
+
+        .glass-effect {
+            background: rgba(10, 25, 47, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .neon-text {
+            color: #64ffda;
+            text-shadow: 0 0 5px #64ffda, 0 0 10px #64ffda, 0 0 15px #64ffda;
+            letter-spacing: 2px;
+            font-size: 1.2em;
+        }
+
+        .cyber-button {
+            background: linear-gradient(45deg, #64ffda, #0a192f);
+            border: 2px solid #64ffda;
+            border-radius: 8px;
+            color: #fff;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(100, 255, 218, 0.5);
+            background: linear-gradient(45deg, #0a192f, #64ffda);
+        }
+
+        .cyber-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent,
+                rgba(100, 255, 218, 0.4),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .cyber-button:hover::before {
+            left: 100%;
+        }
+
+        .option-hover {
+            background: rgba(10, 25, 47, 0.9);
+            border: 1px solid #64ffda;
+            transition: all 0.3s ease;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+
+        .option-hover:hover {
+            transform: translateX(10px);
+            box-shadow: -5px 0 15px rgba(100, 255, 218, 0.3);
+            background: rgba(100, 255, 218, 0.1);
+        }
+
+        select {
+            background: rgba(10, 25, 47, 0.9);
+            border: 1px solid #64ffda;
+            color: #64ffda;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:hover {
+            box-shadow: 0 0 15px rgba(100, 255, 218, 0.3);
+        }
+
+        .progress-text {
+            font-size: 0.9em;
+            color: #8892b0;
+            letter-spacing: 1px;
+        }
+
+        .score-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #64ffda, #0a192f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        @media (max-width: 768px) {
+            .glass-effect {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .cyber-button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+
+        h1, h2, p, select, button {
+            font-size: 1em;
+            line-height: 1.5;
+        }
+
+        /* Animation for correct/incorrect feedback */
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .animate-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes shake {
+            10%, 90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+            20%, 80% {
+                transform: translate3d(2px, 0, 0);
+            }
+            30%, 50%, 70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+            40%, 60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+
+        /* Feedback text styles */
+        .feedback-text {
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Option transition */
+        .option {
+            transition: all 0.3s ease;
+        }
+
+        .option.bg-green-500 {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+        }
+
+        .option.bg-red-500 {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+        }
+
+        /* Breakdown styles */
+        .glass-effect {
+            background: rgba(10, 25, 47, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .border-green-500 {
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+
+        .border-red-500 {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .bg-green-500\/20 {
+            background-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .bg-red-500\/20 {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Animation for breakdown items */
+        .glass-effect {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #api-setup-popup {
+            backdrop-filter: blur(8px);
+        }
+
+        #groq-api-key {
+            background: rgba(10, 25, 47, 0.7);
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            color: #64ffda;
+        }
+
+        #groq-api-key:focus {
+            outline: none;
+            border-color: rgba(100, 255, 218, 0.5);
+            box-shadow: 0 0 0 2px rgba(100, 255, 218, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-[#0a192f] to-[#112240] min-h-screen">
+    <div id="canvas-container"></div>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Category Selection -->
+        <div class="category-selection max-w-2xl mx-auto glass-effect p-4 mb-4">
+            <div class="grid grid-cols-1 gap-4">
+
+
+                <!-- Main Category -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Main Category</label>
+                    <select id="main-category-selector" class="w-full"></select>
+                </div>
+
+                <!-- Sub Category -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Sub Category</label>
+                    <select id="sub-category-selector" class="w-full"></select>
+                </div>
+
+                <!-- Topic -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Topic</label>
+                    <select id="topic-selector" class="w-full"></select>
+                </div>
+
+                <!-- Language Selection -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Language</label>
+                    <select id="language-selector" class="w-full">
+                        <option value="en">English</option>
+                        <option value="fr">French</option>
+                        <option value="es">Spanish</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                        <option value="ja">Japanese</option>
+                        <option value="ko">Korean</option>
+                        <option value="zh">Chinese</option>
+                        <option value="hu">Hungarian</option>
+                    </select>
+                </div>
+                <!-- Age Group Selection -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Age Group</label>
+                    <select id="age-selector" class="w-full">
+                        <option value="kid">Kid (8-12)</option>
+                        <option value="teen" selected>Teen (13-16)</option>
+                        <option value="young adult">Young Adult (17-21)</option>
+                        <option value="adult">Adult (21+)</option>
+                    </select>
+                </div>
+                <!-- Start Quiz Button -->
+                <button id="start-quiz" class="cyber-button w-full">
+                    Start Quiz
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Container (initially hidden) -->
+        <div id="quiz-section" class="max-w-2xl mx-auto glass-effect p-8 hidden">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold neon-text mb-2">AI Quiz Challenge</h1>
+                <p class="progress-text" id="progress">Question 1/10</p>
+            </div>
+
+            <!-- Question Container -->
+            <div id="question-container" class="mb-8">
+                <h2 class="text-2xl mb-6" id="question">Loading question...</h2>
+                
+                <!-- Options -->
+                <div class="space-y-4" id="options-container">
+                    <!-- Options will be inserted here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Navigation Controls -->
+            <div class="flex justify-between items-center mt-6">
+                <button id="prev-btn" class="cyber-button hidden">
+                    Previous
+                </button>
+                <button id="next-btn" class="cyber-button hidden">
+                    Next
+                </button>
+            </div>
+        </div>
+
+        <!-- Score Container (initially hidden) -->
+        <div id="score-container" class="max-w-2xl mx-auto hidden">
+            <!-- Score content will be inserted here by JavaScript -->
+        </div>
+
+        <!-- Error Container (initially hidden) -->
+        <div id="error-container" class="max-w-2xl mx-auto hidden">
+            <!-- Error content will be inserted here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="3d-background.js"></script>
+    <script src="quiz.js"></script>
+</body>
+</html> 
