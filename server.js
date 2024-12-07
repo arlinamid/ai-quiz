@@ -9,7 +9,7 @@ const PORT = 3000;
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: process.env.VERCEL_URL || 'http://localhost:3000',
     methods: ['GET', 'POST'],
     credentials: true
 }));
@@ -709,7 +709,13 @@ app.get('/api/health', (req, res) => {
 // Use the error handler
 app.use(errorHandler);
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-}); 
+// Modify the server start for Vercel
+if (process.env.VERCEL) {
+    // Export the Express app for Vercel
+    export default app;
+} else {
+    // Start the server locally
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+} 

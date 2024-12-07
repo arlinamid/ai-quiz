@@ -2,3 +2,4 @@
 .env
 .cursorrules
 .cursorignore
+package-lock.json
