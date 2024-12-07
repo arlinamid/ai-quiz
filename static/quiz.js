@@ -245,6 +245,17 @@ async function fetchCategoryStructure() {
         console.error('Error fetching categories:', error);
         showError();
     }
+
+    // Add small BuyMeACoffee button after category selectors
+    const coffeeButton = `
+        <div class="mt-4 text-center">
+            <a href="https://www.buymeacoffee.com/arlinamid" target="_blank" 
+               class="inline-flex items-center px-4 py-2 text-sm cyber-button">
+                <span>☕ Support this project</span>
+            </a>
+        </div>
+    `;
+    $('.category-selection').append(coffeeButton);
 }
 
 // Add event listeners for category selection
@@ -324,6 +335,16 @@ function generateQuizSummary() {
                     Score: ${score}/${totalQuestions} (${percentageScore.toFixed(1)}%)
                 </div>
                 <p class="text-xl mb-6">${getPerformanceAnalysis(percentageScore)}</p>
+                
+                <!-- Add BuyMeACoffee prominent button -->
+                <div class="my-8">
+                    <a href="https://www.buymeacoffee.com/arlinamid" 
+                       target="_blank" 
+                       class="inline-flex items-center px-6 py-3 text-lg cyber-button hover:scale-105 transition-transform">
+                        <span class="mr-2">☕</span>
+                        <span>Buy me a coffee if you enjoyed this quiz!</span>
+                    </a>
+                </div>
             </div>
             
             <div class="space-y-6 mb-8">

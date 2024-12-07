@@ -3,3 +3,4 @@
 .cursorrules
 .cursorignore
 package-lock.json
+.vercel
