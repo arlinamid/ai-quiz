@@ -709,13 +709,15 @@ app.get('/api/health', (req, res) => {
 // Use the error handler
 app.use(errorHandler);
 
-// Modify the server start for Vercel
-if (process.env.VERCEL) {
-    // Export the Express app for Vercel
-    export default app;
-} else {
-    // Start the server locally
+// Start the server based on environment
+const startServer = () => {
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
-} 
+};
+
+if (!process.env.VERCEL) {
+    startServer();
+}
+
+export default app; 
